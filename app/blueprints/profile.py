@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, make_response
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
@@ -96,7 +96,10 @@ def toggle_theme():
     db.session.commit()
     mode = 'oscuro' if current_user.dark_mode else 'claro'
     flash(f'Modo {mode} activado.', 'success')
-    return redirect(url_for('profile.index'))
+    resp = make_response(redirect(url_for('profile.index')))
+    resp.set_cookie('theme', 'dark' if current_user.dark_mode else 'light',
+                     max_age=60 * 60 * 24 * 365, samesite='Lax')
+    return resp
 
 
 @profile_bp.route('/photo', methods=['POST'])
