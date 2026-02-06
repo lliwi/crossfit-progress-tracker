@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 
 from app.config import config
-from app.models import db, Exercise, Skill
+from app.models import db, Exercise, Skill, Wod
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -23,7 +23,38 @@ DEFAULT_EXERCISES = [
 DEFAULT_SKILLS = [
     'Pull-up', 'Chest-to-bar', 'Muscle-up (bar)', 'Muscle-up (ring)',
     'Handstand Walk', 'Handstand Push-up', 'Pistol Squat',
-    'Double Under', 'Toes-to-bar', 'Rope Climb', 'L-sit', 
+    'Double Under', 'Toes-to-bar', 'Rope Climb', 'L-sit',
+]
+
+DEFAULT_WODS = [
+    ('Fran', 'for_time',
+     '21-15-9 reps:\n- Thrusters (43/30 kg)\n- Pull-ups'),
+    ('Grace', 'for_time',
+     '30 reps:\n- Clean & Jerk (61/43 kg)'),
+    ('Isabel', 'for_time',
+     '30 reps:\n- Snatch (61/43 kg)'),
+    ('Diane', 'for_time',
+     '21-15-9 reps:\n- Deadlifts (102/70 kg)\n- Handstand Push-ups'),
+    ('Elizabeth', 'for_time',
+     '21-15-9 reps:\n- Cleans (61/43 kg)\n- Ring Dips'),
+    ('Amanda', 'for_time',
+     '9-7-5 reps:\n- Muscle-ups\n- Squat Snatch (61/43 kg)'),
+    ('Jackie', 'for_time',
+     '- 1000m Row\n- 50 Thrusters (20/15 kg)\n- 30 Pull-ups'),
+    ('Karen', 'for_time',
+     '- 150 Wall Balls (9/6 kg)'),
+    ('Murph', 'for_time',
+     'Con chaleco (9/6 kg):\n- 1.6 km Run\n- 100 Pull-ups\n- 200 Push-ups\n- 300 Air Squats\n- 1.6 km Run'),
+    ('DT', 'for_time',
+     '5 rounds (70/47 kg):\n- 12 Deadlifts\n- 9 Hang Power Cleans\n- 6 Push Jerks'),
+    ('Kalsu', 'for_time',
+     '- 100 Thrusters (61/43 kg)\n- EMOM 5 Burpees'),
+    ('Cindy', 'amrap',
+     '20 min AMRAP:\n- 5 Pull-ups\n- 10 Push-ups\n- 15 Air Squats'),
+    ('Mary', 'amrap',
+     '20 min AMRAP:\n- 5 Handstand Push-ups\n- 10 Pistols\n- 15 Pull-ups'),
+    ('Chelsea', 'amrap',
+     '30 min EMOM:\n- 5 Pull-ups\n- 10 Push-ups\n- 15 Air Squats'),
 ]
 
 
@@ -49,12 +80,14 @@ def create_app(config_name=None):
     from app.blueprints.lifts import lifts_bp
     from app.blueprints.skills import skills_bp
     from app.blueprints.profile import profile_bp
+    from app.blueprints.wods import wods_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/')
     app.register_blueprint(lifts_bp, url_prefix='/lifts')
     app.register_blueprint(skills_bp, url_prefix='/skills')
     app.register_blueprint(profile_bp, url_prefix='/profile')
+    app.register_blueprint(wods_bp, url_prefix='/wods')
 
     with app.app_context():
         seed_defaults()
@@ -66,12 +99,13 @@ def seed_defaults():
     """Seed default exercises and skills if they don't exist."""
     from sqlalchemy import inspect, text
     inspector = inspect(db.engine)
-    if not inspector.has_table('exercises'):
+    if not inspector.has_table('exercises') or not inspector.has_table('wods'):
         return
 
     try:
         db.session.execute(text('LOCK TABLE exercises IN EXCLUSIVE MODE'))
         db.session.execute(text('LOCK TABLE skills IN EXCLUSIVE MODE'))
+        db.session.execute(text('LOCK TABLE wods IN EXCLUSIVE MODE'))
 
         for name in DEFAULT_EXERCISES:
             if not Exercise.query.filter_by(name=name).first():
@@ -80,6 +114,13 @@ def seed_defaults():
         for name in DEFAULT_SKILLS:
             if not Skill.query.filter_by(name=name).first():
                 db.session.add(Skill(name=name, is_default=True))
+
+        for name, wod_type, description in DEFAULT_WODS:
+            if not Wod.query.filter_by(name=name).first():
+                db.session.add(Wod(
+                    name=name, wod_type=wod_type,
+                    description=description, is_default=True,
+                ))
 
         db.session.commit()
     except Exception:

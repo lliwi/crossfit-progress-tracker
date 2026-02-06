@@ -20,6 +20,7 @@ class User(UserMixin, db.Model):
 
     lifts = db.relationship('Lift', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     user_skills = db.relationship('UserSkill', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    wod_results = db.relationship('WodResult', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = bcrypt.hashpw(
@@ -76,3 +77,30 @@ class UserSkill(db.Model):
     __table_args__ = (
         db.UniqueConstraint('user_id', 'skill_id', name='uq_user_skill'),
     )
+
+
+class Wod(db.Model):
+    __tablename__ = 'wods'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    wod_type = db.Column(db.String(20), nullable=False)  # 'for_time' or 'amrap'
+    is_default = db.Column(db.Boolean, default=False)
+
+    results = db.relationship('WodResult', backref='wod', lazy='dynamic')
+
+
+class WodResult(db.Model):
+    __tablename__ = 'wod_results'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    wod_id = db.Column(db.Integer, db.ForeignKey('wods.id'), nullable=False)
+    time_seconds = db.Column(db.Integer, nullable=True)
+    rounds = db.Column(db.Integer, nullable=True)
+    reps = db.Column(db.Integer, nullable=True)
+    rx = db.Column(db.Boolean, default=True, nullable=False)
+    date = db.Column(db.Date, nullable=False, default=date.today)
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

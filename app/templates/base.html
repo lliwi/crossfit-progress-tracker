@@ -19,7 +19,7 @@
   <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand fw-semibold" href="{{ url_for('dashboard.index') }}">
-        <i class="bi bi-trophy-fill"></i> PR Tracker
+        <i class="bi bi-trophy-fill"></i> CrossFit Tracker
       </a>
 
       <!-- Desktop nav links -->
@@ -34,6 +34,10 @@
         </a>
         <a href="{{ url_for('lifts.add') }}" class="btn btn-sm btn-primary">
           <i class="bi bi-plus-lg me-1"></i>Nueva
+        </a>
+        <a href="{{ url_for('wods.index') }}"
+           class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('wods') else 'btn-outline-light' }}">
+          <i class="bi bi-stopwatch me-1"></i>WODs
         </a>
         <a href="{{ url_for('skills.index') }}"
            class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('skills') else 'btn-outline-light' }}">
@@ -101,6 +105,11 @@
               style="width: 40px; height: 40px;">
           <i class="bi bi-plus-lg"></i>
         </span>
+      </a>
+      <a href="{{ url_for('wods.index') }}"
+         class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('wods') else 'text-secondary' }}">
+        <i class="bi bi-stopwatch d-block"></i>
+        <small>WODs</small>
       </a>
       <a href="{{ url_for('skills.index') }}"
          class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('skills') else 'text-secondary' }}">

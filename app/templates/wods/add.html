@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Resultado WOD{% endblock %}
+
+{% block content %}
+<h4 class="mb-3">Nuevo Resultado WOD</h4>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        <label for="wod_id" class="form-label">WOD</label>
+        {{ form.wod_id(class="form-select", id="wod_id") }}
+      </div>
+
+      <!-- For Time fields -->
+      <div id="for-time-fields">
+        <label class="form-label">Tiempo</label>
+        <div class="row mb-3">
+          <div class="col-6">
+            {{ form.time_minutes(class="form-control", placeholder="Min", id="time_minutes", inputmode="numeric") }}
+          </div>
+          <div class="col-6">
+            {{ form.time_seconds(class="form-control", placeholder="Seg", id="time_seconds", inputmode="numeric") }}
+          </div>
+        </div>
+      </div>
+
+      <!-- AMRAP fields -->
+      <div id="amrap-fields" style="display: none;">
+        <div class="row mb-3">
+          <div class="col-6">
+            <label for="rounds" class="form-label">Rondas</label>
+            {{ form.rounds(class="form-control", placeholder="0", id="rounds", inputmode="numeric") }}
+          </div>
+          <div class="col-6">
+            <label for="reps" class="form-label">Reps extra</label>
+            {{ form.reps(class="form-control", placeholder="0", id="reps", inputmode="numeric") }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3 form-check">
+        {{ form.rx(class="form-check-input", id="rx") }}
+        <label class="form-check-label" for="rx">RX (peso prescrito)</label>
+      </div>
+
+      <div class="mb-3">
+        <label for="date" class="form-label">Fecha</label>
+        {{ form.date(class="form-control", id="date", type="date") }}
+      </div>
+
+      <div class="mb-3">
+        <label for="notes" class="form-label">Notas (opcional)</label>
+        {{ form.notes(class="form-control", id="notes", rows="2", placeholder="Sensaciones, estrategia...") }}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Guardar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const wodTypes = {{ wod_types | tojson }};
+const wodSelect = document.getElementById('wod_id');
+const forTimeFields = document.getElementById('for-time-fields');
+const amrapFields = document.getElementById('amrap-fields');
+
+function toggleFields() {
+  const type = wodTypes[wodSelect.value];
+  if (type === 'amrap') {
+    forTimeFields.style.display = 'none';
+    amrapFields.style.display = 'block';
+  } else {
+    forTimeFields.style.display = 'block';
+    amrapFields.style.display = 'none';
+  }
+}
+
+wodSelect.addEventListener('change', toggleFields);
+toggleFields();
+</script>
+{% endblock %}

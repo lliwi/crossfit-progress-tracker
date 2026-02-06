@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Historico - {{ wod.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">{{ wod.name }}</h4>
+  <a href="{{ url_for('wods.detail', wod_id=wod.id) }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+</div>
+
+{% if results %}
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Resultado</th>
+          <th>RX</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td>{{ r.date.strftime('%d/%m/%Y') }}</td>
+          <td class="fw-bold">
+            {% if wod.wod_type == 'for_time' %}
+              {{ format_time(r.time_seconds) }}
+            {% else %}
+              {{ r.rounds }}{% if r.reps %}+{{ r.reps }}{% endif %}
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-{{ 'success' if r.rx else 'secondary' }}">
+              {{ 'RX' if r.rx else 'Scaled' }}
+            </span>
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('wods.edit', result_id=r.id) }}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form method="POST" action="{{ url_for('wods.delete', result_id=r.id) }}"
+                    onsubmit="return confirm('Borrar este resultado?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% if r.notes %}
+        <tr>
+          <td colspan="4" class="text-muted small py-1 ps-4">{{ r.notes }}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">No hay resultados registrados para este WOD.</div>
+{% endif %}
+
+<a href="{{ url_for('wods.add') }}" class="btn btn-primary w-100 mt-3">+ Nuevo Resultado</a>
+{% endblock %}
