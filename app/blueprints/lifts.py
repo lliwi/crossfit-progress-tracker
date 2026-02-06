@@ -94,10 +94,12 @@ def add():
             exercise = Exercise.query.get(form.exercise_id.data)
             if not exercise:
                 flash('Ejercicio no encontrado.', 'danger')
-                return render_template('lifts/add.html', form=form)
+                return render_template('lifts/add.html', form=form,
+                                       recent_exercises=[], last_weights={})
         else:
             flash('Selecciona un ejercicio o introduce uno nuevo.', 'warning')
-            return render_template('lifts/add.html', form=form)
+            return render_template('lifts/add.html', form=form,
+                                   recent_exercises=[], last_weights={})
 
         lift = Lift(
             user_id=current_user.id,
@@ -112,7 +114,33 @@ def add():
         flash(f'{exercise.name} - {form.weight.data} kg ({form.reps_type.data}RM) registrado!', 'success')
         return redirect(url_for('lifts.exercise_detail', exercise_id=exercise.id))
 
-    return render_template('lifts/add.html', form=form)
+    # Recent exercises: last 6 distinct exercises used by this user
+    recent_lifts = (
+        db.session.query(Exercise, func.max(Lift.date).label('last_date'))
+        .join(Lift)
+        .filter(Lift.user_id == current_user.id)
+        .group_by(Exercise.id)
+        .order_by(func.max(Lift.date).desc())
+        .limit(6)
+        .all()
+    )
+    recent_exercises = [row[0] for row in recent_lifts]
+
+    # Last weight used per exercise (most recent lift for each)
+    last_weights = {}
+    for ex in recent_exercises:
+        last_lift = (
+            Lift.query
+            .filter_by(user_id=current_user.id, exercise_id=ex.id)
+            .order_by(Lift.date.desc(), Lift.created_at.desc())
+            .first()
+        )
+        if last_lift:
+            last_weights[ex.id] = last_lift.weight
+
+    return render_template('lifts/add.html', form=form,
+                           recent_exercises=recent_exercises,
+                           last_weights=last_weights)
 
 
 @lifts_bp.route('/exercise/<int:exercise_id>')

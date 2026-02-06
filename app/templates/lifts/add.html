@@ -7,11 +7,29 @@
 
 <div class="card shadow-sm">
   <div class="card-body">
-    <form method="POST">
+    <form method="POST" id="liftForm">
       {{ form.hidden_tag() }}
 
+      <!-- Quick exercise buttons -->
+      {% if recent_exercises %}
+      <label class="form-label">Recientes</label>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for ex in recent_exercises %}
+        <button type="button"
+                class="btn btn-outline-primary btn-sm exercise-quick-btn"
+                data-exercise-id="{{ ex.id }}"
+                data-last-weight="{{ last_weights.get(ex.id, '') }}">
+          {{ ex.name }}
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Exercise dropdown (collapsed if recent exercises exist) -->
       <div class="mb-3">
-        <label for="exercise_id" class="form-label">Ejercicio</label>
+        <label class="form-label">
+          {% if recent_exercises %}Otro ejercicio{% else %}Ejercicio{% endif %}
+        </label>
         {{ form.exercise_id(class="form-select", id="exercise_id") }}
       </div>
 
@@ -20,31 +38,134 @@
         {{ form.new_exercise(class="form-control", placeholder="Ej: Turkish Get-Up", id="new_exercise") }}
       </div>
 
-      <div class="row">
-        <div class="col-6 mb-3">
-          <label for="weight" class="form-label">Peso (kg)</label>
-          {{ form.weight(class="form-control", placeholder="0.0", id="weight", step="0.5", inputmode="decimal") }}
-          {% for error in form.weight.errors %}
-            <div class="invalid-feedback d-block">{{ error }}</div>
-          {% endfor %}
+      <!-- Weight with stepper buttons -->
+      <label class="form-label">Peso (kg)</label>
+      <div class="weight-stepper mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-outline-secondary weight-btn" data-delta="-2.5">-2.5</button>
+          <button type="button" class="btn btn-outline-secondary weight-btn" data-delta="-0.5">-0.5</button>
+          {{ form.weight(class="form-control text-center fw-bold fs-5 weight-input", placeholder="0", id="weight", step="0.5", inputmode="decimal") }}
+          <button type="button" class="btn btn-outline-secondary weight-btn" data-delta="0.5">+0.5</button>
+          <button type="button" class="btn btn-outline-secondary weight-btn" data-delta="2.5">+2.5</button>
         </div>
+        {% for error in form.weight.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
 
-        <div class="col-6 mb-3">
-          <label for="reps_type" class="form-label">Tipo</label>
-          {{ form.reps_type(class="form-select", id="reps_type") }}
+      <!-- RM type as toggle buttons -->
+      <label class="form-label">Tipo</label>
+      <div class="mb-3">
+        <input type="hidden" name="reps_type" id="reps_type" value="{{ form.reps_type.data or 1 }}">
+        <div class="btn-group w-100" role="group">
+          <button type="button" class="btn rm-toggle {{ 'btn-primary' if (form.reps_type.data or 1) == 1 else 'btn-outline-primary' }}"
+                  data-rm="1">1RM</button>
+          <button type="button" class="btn rm-toggle {{ 'btn-primary' if form.reps_type.data == 3 else 'btn-outline-primary' }}"
+                  data-rm="3">3RM</button>
         </div>
       </div>
 
+      <!-- Date (collapsed, defaults to today) -->
       <div class="mb-3">
-        <label for="date" class="form-label">Fecha</label>
-        {{ form.date(class="form-control", id="date", type="date") }}
+        <div class="d-flex justify-content-between align-items-center">
+          <label for="date" class="form-label mb-0">Fecha</label>
+          <span class="text-muted small" id="dateDisplay">Hoy</span>
+        </div>
+        <div id="dateCollapse" class="mt-2" style="display: none;">
+          {{ form.date(class="form-control", id="date", type="date") }}
+        </div>
+        <button type="button" class="btn btn-link btn-sm p-0 mt-1" id="toggleDate">Cambiar fecha</button>
         {% for error in form.date.errors %}
           <div class="invalid-feedback d-block">{{ error }}</div>
         {% endfor %}
       </div>
 
-      <button type="submit" class="btn btn-primary w-100">Guardar</button>
+      <button type="submit" class="btn btn-primary w-100 btn-lg">Guardar</button>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* Quick exercise selection */
+document.querySelectorAll('.exercise-quick-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    // Deselect all quick buttons
+    document.querySelectorAll('.exercise-quick-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    // Select this one
+    this.classList.remove('btn-outline-primary');
+    this.classList.add('btn-primary');
+
+    // Set the dropdown value
+    const exId = this.dataset.exerciseId;
+    document.getElementById('exercise_id').value = exId;
+    document.getElementById('new_exercise').value = '';
+
+    // Pre-fill last weight if available and input is empty
+    const lastWeight = this.dataset.lastWeight;
+    const weightInput = document.getElementById('weight');
+    if (lastWeight && !weightInput.value) {
+      weightInput.value = lastWeight;
+    }
+  });
+});
+
+/* Clear quick selection when dropdown changes */
+document.getElementById('exercise_id').addEventListener('change', function() {
+  document.querySelectorAll('.exercise-quick-btn').forEach(b => {
+    b.classList.remove('btn-primary');
+    b.classList.add('btn-outline-primary');
+  });
+});
+
+/* Weight stepper */
+document.querySelectorAll('.weight-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const input = document.getElementById('weight');
+    const current = parseFloat(input.value) || 0;
+    const delta = parseFloat(this.dataset.delta);
+    const newVal = Math.max(0, Math.round((current + delta) * 10) / 10);
+    input.value = newVal > 0 ? newVal : '';
+  });
+});
+
+/* RM toggle */
+document.querySelectorAll('.rm-toggle').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.rm-toggle').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    this.classList.remove('btn-outline-primary');
+    this.classList.add('btn-primary');
+    document.getElementById('reps_type').value = this.dataset.rm;
+  });
+});
+
+/* Date toggle */
+const toggleBtn = document.getElementById('toggleDate');
+const dateCollapse = document.getElementById('dateCollapse');
+const dateDisplay = document.getElementById('dateDisplay');
+const dateInput = document.getElementById('date');
+
+toggleBtn.addEventListener('click', function() {
+  const isHidden = dateCollapse.style.display === 'none';
+  dateCollapse.style.display = isHidden ? 'block' : 'none';
+  toggleBtn.textContent = isHidden ? 'Usar hoy' : 'Cambiar fecha';
+  if (!isHidden) {
+    // Reset to today
+    dateInput.value = new Date().toISOString().split('T')[0];
+    dateDisplay.textContent = 'Hoy';
+  }
+});
+
+dateInput.addEventListener('change', function() {
+  const today = new Date().toISOString().split('T')[0];
+  dateDisplay.textContent = this.value === today ? 'Hoy' : this.value.split('-').reverse().join('/');
+});
+</script>
 {% endblock %}

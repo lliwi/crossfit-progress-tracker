@@ -39,6 +39,25 @@ body {
   background-color: #212529;
 }
 
+/* Weight stepper */
+.weight-stepper .weight-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.weight-stepper .weight-input {
+  max-width: 100px;
+}
+
+/* Quick exercise buttons */
+.exercise-quick-btn {
+  min-height: 38px;
+}
+
 /* Desktop: no bottom nav padding, cap content width */
 @media (min-width: 992px) {
   body {
