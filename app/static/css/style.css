@@ -58,6 +58,36 @@ body {
   min-height: 38px;
 }
 
+/* Timer display */
+.timer-time {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.timer-countdown {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.timer-display-card {
+  transition: background-color 0.3s ease;
+}
+
+.timer-work {
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.25) !important;
+}
+
+.timer-rest {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+}
+
 /* Desktop: no bottom nav padding, cap content width */
 @media (min-width: 992px) {
   body {

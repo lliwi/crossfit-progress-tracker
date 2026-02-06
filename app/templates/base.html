@@ -43,6 +43,10 @@
            class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('skills') else 'btn-outline-light' }}">
           <i class="bi bi-check2-square me-1"></i>Skills
         </a>
+        <a href="{{ url_for('timer.index') }}"
+           class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('timer') else 'btn-outline-light' }}">
+          <i class="bi bi-stopwatch-fill me-1"></i>Crono
+        </a>
         <span class="text-secondary mx-2">|</span>
         <a href="{{ url_for('profile.index') }}"
            class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('profile') else 'btn-outline-light' }}">
@@ -55,6 +59,9 @@
 
       <!-- Mobile top-right buttons -->
       <div class="d-lg-none d-flex gap-1">
+        <a href="{{ url_for('lifts.add') }}" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-lg"></i>
+        </a>
         <a href="{{ url_for('profile.index') }}" class="btn btn-outline-light btn-sm">
           <i class="bi bi-person-circle"></i>
         </a>
@@ -99,12 +106,10 @@
         <i class="bi bi-bar-chart-fill d-block"></i>
         <small>Marcas</small>
       </a>
-      <a href="{{ url_for('lifts.add') }}"
-         class="nav-link text-center">
-        <span class="btn btn-primary btn-sm rounded-circle d-inline-flex align-items-center justify-content-center"
-              style="width: 40px; height: 40px;">
-          <i class="bi bi-plus-lg"></i>
-        </span>
+      <a href="{{ url_for('timer.index') }}"
+         class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('timer') else 'text-secondary' }}">
+        <i class="bi bi-stopwatch-fill d-block"></i>
+        <small>Crono</small>
       </a>
       <a href="{{ url_for('wods.index') }}"
          class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('wods') else 'text-secondary' }}">

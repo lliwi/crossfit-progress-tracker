@@ -81,6 +81,7 @@ def create_app(config_name=None):
     from app.blueprints.skills import skills_bp
     from app.blueprints.profile import profile_bp
     from app.blueprints.wods import wods_bp
+    from app.blueprints.timer import timer_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/')
@@ -88,6 +89,7 @@ def create_app(config_name=None):
     app.register_blueprint(skills_bp, url_prefix='/skills')
     app.register_blueprint(profile_bp, url_prefix='/profile')
     app.register_blueprint(wods_bp, url_prefix='/wods')
+    app.register_blueprint(timer_bp, url_prefix='/timer')
 
     with app.app_context():
         seed_defaults()

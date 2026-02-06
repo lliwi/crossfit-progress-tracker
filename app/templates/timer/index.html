@@ -1,0 +1,536 @@
+{% extends "base.html" %}
+
+{% block title %}Cronometro{% endblock %}
+
+{% block content %}
+<!-- Mode selector -->
+<div class="btn-group w-100 mb-3" role="group" id="modeSelector">
+  <button type="button" class="btn btn-primary btn-sm mode-btn" data-mode="fortime">For Time</button>
+  <button type="button" class="btn btn-outline-primary btn-sm mode-btn" data-mode="amrap">AMRAP</button>
+  <button type="button" class="btn btn-outline-primary btn-sm mode-btn" data-mode="emom">EMOM</button>
+  <button type="button" class="btn btn-outline-primary btn-sm mode-btn" data-mode="tabata">Tabata</button>
+</div>
+
+<!-- Configuration panels -->
+<div class="card shadow-sm mb-3" id="configPanel">
+  <div class="card-body py-2">
+
+    <!-- For Time config -->
+    <div class="config-section" id="config-fortime">
+      <label class="form-label small mb-1">Time Cap (opcional)</label>
+      <div class="d-flex align-items-center gap-2">
+        <div class="input-group input-group-sm" style="max-width: 200px;">
+          <input type="number" class="form-control text-center" id="ftCapMin" value="" min="0" max="60" placeholder="Min" inputmode="numeric">
+          <span class="input-group-text">:</span>
+          <input type="number" class="form-control text-center" id="ftCapSec" value="0" min="0" max="59" placeholder="Seg" inputmode="numeric">
+        </div>
+        <span class="text-muted small">Sin cap = libre</span>
+      </div>
+    </div>
+
+    <!-- AMRAP config -->
+    <div class="config-section d-none" id="config-amrap">
+      <label class="form-label small mb-1">Duracion</label>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-primary btn-sm dur-btn" data-minutes="8">8 min</button>
+        <button type="button" class="btn btn-outline-primary btn-sm dur-btn" data-minutes="10">10 min</button>
+        <button type="button" class="btn btn-outline-primary btn-sm dur-btn" data-minutes="12">12 min</button>
+        <button type="button" class="btn btn-primary btn-sm dur-btn" data-minutes="15">15 min</button>
+        <button type="button" class="btn btn-outline-primary btn-sm dur-btn" data-minutes="20">20 min</button>
+        <div class="input-group input-group-sm" style="max-width: 110px;">
+          <input type="number" class="form-control text-center" id="amrapCustomMin" min="1" max="60" placeholder="Otro" inputmode="numeric">
+          <span class="input-group-text">min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMOM config -->
+    <div class="config-section d-none" id="config-emom">
+      <label class="form-label small mb-1">Minutos totales</label>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-primary btn-sm emom-btn" data-minutes="8">8</button>
+        <button type="button" class="btn btn-outline-primary btn-sm emom-btn" data-minutes="10">10</button>
+        <button type="button" class="btn btn-primary btn-sm emom-btn" data-minutes="12">12</button>
+        <button type="button" class="btn btn-outline-primary btn-sm emom-btn" data-minutes="15">15</button>
+        <button type="button" class="btn btn-outline-primary btn-sm emom-btn" data-minutes="20">20</button>
+        <div class="input-group input-group-sm" style="max-width: 110px;">
+          <input type="number" class="form-control text-center" id="emomCustomMin" min="1" max="60" placeholder="Otro" inputmode="numeric">
+          <span class="input-group-text">min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabata config -->
+    <div class="config-section d-none" id="config-tabata">
+      <div class="row g-2">
+        <div class="col-4">
+          <label class="form-label small mb-1">Trabajo</label>
+          <div class="input-group input-group-sm">
+            <input type="number" class="form-control text-center" id="tabataWork" value="20" min="5" max="120" inputmode="numeric">
+            <span class="input-group-text">s</span>
+          </div>
+        </div>
+        <div class="col-4">
+          <label class="form-label small mb-1">Descanso</label>
+          <div class="input-group input-group-sm">
+            <input type="number" class="form-control text-center" id="tabataRest" value="10" min="0" max="120" inputmode="numeric">
+            <span class="input-group-text">s</span>
+          </div>
+        </div>
+        <div class="col-4">
+          <label class="form-label small mb-1">Rondas</label>
+          <input type="number" class="form-control form-control-sm text-center" id="tabataRounds" value="8" min="1" max="50" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Timer display -->
+<div class="card shadow-sm mb-3 timer-display-card" id="timerCard">
+  <div class="card-body text-center py-4">
+    <!-- Round info (EMOM / Tabata) -->
+    <div id="roundInfo" class="d-none mb-1">
+      <span class="badge bg-secondary fs-6" id="roundBadge">Ronda 1 / 12</span>
+    </div>
+
+    <!-- Phase info (Tabata) -->
+    <div id="phaseInfo" class="d-none mb-1">
+      <span class="badge fs-6" id="phaseBadge">TRABAJO</span>
+    </div>
+
+    <!-- Countdown overlay -->
+    <div id="countdownOverlay" class="d-none">
+      <span class="timer-countdown" id="countdownNum">3</span>
+    </div>
+
+    <!-- Main time display -->
+    <div id="timeDisplay" class="timer-time">00:00</div>
+
+    <!-- Finished message -->
+    <div id="finishedMsg" class="d-none">
+      <span class="badge bg-success fs-5 mt-2">FINALIZADO</span>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="d-flex gap-2 mb-3">
+  <button type="button" class="btn btn-success btn-lg flex-fill" id="btnStart">
+    <i class="bi bi-play-fill me-1"></i>Start
+  </button>
+  <button type="button" class="btn btn-warning btn-lg flex-fill d-none" id="btnPause">
+    <i class="bi bi-pause-fill me-1"></i>Pausa
+  </button>
+  <button type="button" class="btn btn-outline-secondary btn-lg" id="btnReset" disabled>
+    <i class="bi bi-arrow-counterclockwise"></i>
+  </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Audio (Web Audio API) ──────────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function beep(freq, duration, count) {
+  ensureAudio();
+  count = count || 1;
+  for (let i = 0; i < count; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'square';
+    const start = audioCtx.currentTime + i * (duration + 0.15);
+    gain.gain.setValueAtTime(0.3, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    osc.start(start);
+    osc.stop(start + duration);
+  }
+}
+
+function beepShort()  { beep(880, 0.15, 1); }
+function beepFinish() { beep(660, 0.4, 3); }
+function beepCount()  { beep(440, 0.2, 1); }
+function beepGo()     { beep(880, 0.4, 1); }
+
+// ── State ──────────────────────────────────────────────────
+let mode = 'fortime';     // fortime | amrap | emom | tabata
+let timerState = 'idle';  // idle | countdown | running | paused | finished
+let intervalId = null;
+let elapsed = 0;          // centiseconds elapsed (for fortime)
+let remaining = 0;        // seconds remaining (for amrap/emom/tabata)
+let totalSeconds = 0;     // total configured seconds
+let currentRound = 0;
+let totalRounds = 0;
+let tabataPhase = 'work'; // work | rest
+let tabataPhaseRemaining = 0;
+
+// Config values
+let amrapMinutes = 15;
+let emomMinutes = 12;
+let ftCapSeconds = 0;     // 0 = no cap
+let tabataWorkSec = 20;
+let tabataRestSec = 10;
+let tabataNumRounds = 8;
+
+// ── DOM refs ───────────────────────────────────────────────
+const timeDisplay   = document.getElementById('timeDisplay');
+const roundInfo     = document.getElementById('roundInfo');
+const roundBadge    = document.getElementById('roundBadge');
+const phaseInfo     = document.getElementById('phaseInfo');
+const phaseBadge    = document.getElementById('phaseBadge');
+const countdownOver = document.getElementById('countdownOverlay');
+const countdownNum  = document.getElementById('countdownNum');
+const finishedMsg   = document.getElementById('finishedMsg');
+const timerCard     = document.getElementById('timerCard');
+const btnStart      = document.getElementById('btnStart');
+const btnPause      = document.getElementById('btnPause');
+const btnReset      = document.getElementById('btnReset');
+const configPanel   = document.getElementById('configPanel');
+
+// ── Mode selection ─────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    if (timerState !== 'idle') return; // don't switch while running
+    document.querySelectorAll('.mode-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    this.classList.remove('btn-outline-primary');
+    this.classList.add('btn-primary');
+    mode = this.dataset.mode;
+    showConfig(mode);
+    resetTimer();
+  });
+});
+
+function showConfig(m) {
+  document.querySelectorAll('.config-section').forEach(s => s.classList.add('d-none'));
+  document.getElementById('config-' + m).classList.remove('d-none');
+}
+
+// ── AMRAP duration buttons ─────────────────────────────────
+document.querySelectorAll('.dur-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.dur-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    this.classList.remove('btn-outline-primary');
+    this.classList.add('btn-primary');
+    amrapMinutes = parseInt(this.dataset.minutes);
+    document.getElementById('amrapCustomMin').value = '';
+    resetTimer();
+  });
+});
+
+document.getElementById('amrapCustomMin').addEventListener('input', function() {
+  if (this.value) {
+    amrapMinutes = parseInt(this.value);
+    document.querySelectorAll('.dur-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    resetTimer();
+  }
+});
+
+// ── EMOM minutes buttons ───────────────────────────────────
+document.querySelectorAll('.emom-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.emom-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    this.classList.remove('btn-outline-primary');
+    this.classList.add('btn-primary');
+    emomMinutes = parseInt(this.dataset.minutes);
+    document.getElementById('emomCustomMin').value = '';
+    resetTimer();
+  });
+});
+
+document.getElementById('emomCustomMin').addEventListener('input', function() {
+  if (this.value) {
+    emomMinutes = parseInt(this.value);
+    document.querySelectorAll('.emom-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    resetTimer();
+  }
+});
+
+// ── Format helpers ─────────────────────────────────────────
+function fmtTime(seconds) {
+  const m = Math.floor(Math.abs(seconds) / 60);
+  const s = Math.abs(seconds) % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+// ── Display update ─────────────────────────────────────────
+function updateDisplay() {
+  if (mode === 'fortime') {
+    const secs = Math.floor(elapsed / 100);
+    timeDisplay.textContent = fmtTime(secs);
+  } else if (mode === 'amrap') {
+    timeDisplay.textContent = fmtTime(remaining);
+  } else if (mode === 'emom') {
+    const inMinute = remaining % 60 === 0 && remaining > 0 ? 60 : remaining % 60 || (remaining === 0 ? 0 : 60);
+    const secInMinute = remaining > 0 ? ((remaining - 1) % 60) + 1 : 0;
+    timeDisplay.textContent = fmtTime(secInMinute);
+    currentRound = totalRounds - Math.ceil(remaining / 60) + 1;
+    if (remaining === 0) currentRound = totalRounds;
+    roundBadge.textContent = 'Ronda ' + currentRound + ' / ' + totalRounds;
+  } else if (mode === 'tabata') {
+    timeDisplay.textContent = fmtTime(tabataPhaseRemaining);
+    roundBadge.textContent = 'Ronda ' + currentRound + ' / ' + totalRounds;
+    if (tabataPhase === 'work') {
+      phaseBadge.textContent = 'TRABAJO';
+      phaseBadge.className = 'badge fs-6 bg-success';
+      timerCard.classList.remove('timer-rest');
+      timerCard.classList.add('timer-work');
+    } else {
+      phaseBadge.textContent = 'DESCANSO';
+      phaseBadge.className = 'badge fs-6 bg-danger';
+      timerCard.classList.remove('timer-work');
+      timerCard.classList.add('timer-rest');
+    }
+  }
+}
+
+// ── Timer logic ────────────────────────────────────────────
+function tick() {
+  if (mode === 'fortime') {
+    elapsed += 10; // 100ms intervals = 10 centiseconds
+    const secs = Math.floor(elapsed / 100);
+    updateDisplay();
+    // Check time cap
+    if (ftCapSeconds > 0 && secs >= ftCapSeconds) {
+      finish();
+    }
+  } else if (mode === 'amrap') {
+    remaining--;
+    updateDisplay();
+    // Beep at 3, 2, 1
+    if (remaining <= 3 && remaining > 0) beepCount();
+    if (remaining <= 0) finish();
+  } else if (mode === 'emom') {
+    remaining--;
+    updateDisplay();
+    // Beep at each minute boundary
+    if (remaining > 0 && remaining % 60 === 0) beepShort();
+    // Beep at 3, 2, 1 of each minute
+    const secInMin = remaining % 60;
+    if (remaining > 0 && secInMin <= 3 && secInMin > 0) beepCount();
+    if (remaining <= 0) finish();
+  } else if (mode === 'tabata') {
+    tabataPhaseRemaining--;
+    // Beep at 3, 2, 1
+    if (tabataPhaseRemaining <= 3 && tabataPhaseRemaining > 0) beepCount();
+    if (tabataPhaseRemaining <= 0) {
+      if (tabataPhase === 'work') {
+        if (tabataRestSec > 0) {
+          // Switch to rest
+          tabataPhase = 'rest';
+          tabataPhaseRemaining = tabataRestSec;
+          beepShort();
+        } else {
+          // No rest: next round directly
+          currentRound++;
+          if (currentRound > totalRounds) {
+            finish();
+            return;
+          }
+          tabataPhaseRemaining = tabataWorkSec;
+          beepShort();
+        }
+      } else {
+        // End of rest = next round
+        currentRound++;
+        if (currentRound > totalRounds) {
+          finish();
+          return;
+        }
+        tabataPhase = 'work';
+        tabataPhaseRemaining = tabataWorkSec;
+        beepShort();
+      }
+    }
+    updateDisplay();
+  }
+}
+
+function startTimer() {
+  ensureAudio();
+  if (timerState === 'idle' || timerState === 'finished') {
+    // Read config
+    readConfig();
+    // Start countdown 3-2-1
+    startCountdown();
+  } else if (timerState === 'paused') {
+    // Resume
+    timerState = 'running';
+    btnStart.classList.add('d-none');
+    btnPause.classList.remove('d-none');
+    if (mode === 'fortime') {
+      intervalId = setInterval(tick, 100);
+    } else {
+      intervalId = setInterval(tick, 1000);
+    }
+  }
+}
+
+function readConfig() {
+  if (mode === 'fortime') {
+    const capMin = parseInt(document.getElementById('ftCapMin').value) || 0;
+    const capSec = parseInt(document.getElementById('ftCapSec').value) || 0;
+    ftCapSeconds = capMin * 60 + capSec;
+    elapsed = 0;
+  } else if (mode === 'amrap') {
+    totalSeconds = amrapMinutes * 60;
+    remaining = totalSeconds;
+  } else if (mode === 'emom') {
+    totalRounds = emomMinutes;
+    totalSeconds = emomMinutes * 60;
+    remaining = totalSeconds;
+    currentRound = 1;
+  } else if (mode === 'tabata') {
+    tabataWorkSec = parseInt(document.getElementById('tabataWork').value) || 20;
+    tabataRestSec = parseInt(document.getElementById('tabataRest').value) || 10;
+    tabataNumRounds = parseInt(document.getElementById('tabataRounds').value) || 8;
+    totalRounds = tabataNumRounds;
+    currentRound = 1;
+    tabataPhase = 'work';
+    tabataPhaseRemaining = tabataWorkSec;
+  }
+}
+
+function startCountdown() {
+  timerState = 'countdown';
+  configPanel.classList.add('d-none');
+  btnStart.classList.add('d-none');
+  btnPause.classList.remove('d-none');
+  btnPause.disabled = true;
+  btnReset.disabled = false;
+  countdownOver.classList.remove('d-none');
+  timeDisplay.classList.add('d-none');
+  finishedMsg.classList.add('d-none');
+
+  // Show round/phase info
+  if (mode === 'emom') {
+    roundInfo.classList.remove('d-none');
+  } else if (mode === 'tabata') {
+    roundInfo.classList.remove('d-none');
+    phaseInfo.classList.remove('d-none');
+  }
+
+  updateDisplay();
+
+  let count = 3;
+  countdownNum.textContent = count;
+  beepCount();
+
+  const cdInterval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      countdownNum.textContent = count;
+      beepCount();
+    } else if (count === 0) {
+      countdownNum.textContent = 'GO!';
+      beepGo();
+    } else {
+      clearInterval(cdInterval);
+      countdownOver.classList.add('d-none');
+      timeDisplay.classList.remove('d-none');
+      timerState = 'running';
+      btnPause.disabled = false;
+      // Lock mode buttons
+      document.querySelectorAll('.mode-btn').forEach(b => b.disabled = true);
+      if (mode === 'fortime') {
+        intervalId = setInterval(tick, 100);
+      } else {
+        intervalId = setInterval(tick, 1000);
+      }
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  if (timerState === 'running') {
+    timerState = 'paused';
+    clearInterval(intervalId);
+    btnPause.classList.add('d-none');
+    btnStart.classList.remove('d-none');
+    btnStart.innerHTML = '<i class="bi bi-play-fill me-1"></i>Reanudar';
+  }
+}
+
+function finish() {
+  timerState = 'finished';
+  clearInterval(intervalId);
+  beepFinish();
+  finishedMsg.classList.remove('d-none');
+  btnPause.classList.add('d-none');
+  btnStart.classList.remove('d-none');
+  btnStart.innerHTML = '<i class="bi bi-play-fill me-1"></i>Start';
+  btnStart.disabled = true;
+  timerCard.classList.remove('timer-work', 'timer-rest');
+}
+
+function resetTimer() {
+  timerState = 'idle';
+  clearInterval(intervalId);
+  elapsed = 0;
+  remaining = 0;
+
+  timeDisplay.textContent = '00:00';
+  timeDisplay.classList.remove('d-none');
+  countdownOver.classList.add('d-none');
+  finishedMsg.classList.add('d-none');
+  roundInfo.classList.add('d-none');
+  phaseInfo.classList.add('d-none');
+  configPanel.classList.remove('d-none');
+  timerCard.classList.remove('timer-work', 'timer-rest');
+
+  btnStart.classList.remove('d-none');
+  btnStart.innerHTML = '<i class="bi bi-play-fill me-1"></i>Start';
+  btnStart.disabled = false;
+  btnPause.classList.add('d-none');
+  btnReset.disabled = true;
+
+  document.querySelectorAll('.mode-btn').forEach(b => b.disabled = false);
+}
+
+// ── Button events ──────────────────────────────────────────
+btnStart.addEventListener('click', startTimer);
+btnPause.addEventListener('click', pauseTimer);
+btnReset.addEventListener('click', resetTimer);
+
+// Prevent screen sleep via Wake Lock API (if available)
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (e) { /* ignore */ }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && timerState === 'running') {
+    requestWakeLock();
+  }
+});
+</script>
+{% endblock %}
