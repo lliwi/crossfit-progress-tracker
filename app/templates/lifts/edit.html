@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Marca{% endblock %}
+
+{% block content %}
+<h4 class="mb-3">Editar Marca - {{ lift.exercise.name }}</h4>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="row">
+        <div class="col-6 mb-3">
+          <label for="weight" class="form-label">Peso (kg)</label>
+          {{ form.weight(class="form-control", placeholder="0.0", id="weight", step="0.5", inputmode="decimal") }}
+          {% for error in form.weight.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-6 mb-3">
+          <label for="reps_type" class="form-label">Tipo</label>
+          {{ form.reps_type(class="form-select", id="reps_type") }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="date" class="form-label">Fecha</label>
+        {{ form.date(class="form-control", id="date", type="date") }}
+        {% for error in form.date.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill">Guardar</button>
+        <a href="{{ url_for('lifts.history', exercise_id=lift.exercise_id) }}" class="btn btn-outline-secondary flex-fill">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+/* Mobile-first styles for CrossFit PR Tracker */
+
+body {
+  background-color: #f8f9fa;
+  padding-bottom: 70px; /* space for bottom nav on mobile */
+}
+
+/* Compact cards */
+.card {
+  border-radius: 12px;
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Bottom nav adjustments (mobile) */
+.fixed-bottom .nav-link {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.fixed-bottom .nav-link i {
+  font-size: 1.2rem;
+}
+
+/* Make tables readable on mobile */
+.table {
+  font-size: 0.9rem;
+}
+
+/* Skills grid buttons */
+.btn-success i, .btn-outline-secondary i {
+  font-size: 1.3rem;
+}
+
+/* Dark mode body background */
+[data-bs-theme="dark"] body {
+  background-color: #212529;
+}
+
+/* Desktop: no bottom nav padding, cap content width */
+@media (min-width: 992px) {
+  body {
+    padding-bottom: 0;
+  }
+
+  .content-container {
+    max-width: 900px;
+  }
+
+  .table {
+    font-size: 1rem;
+  }
+}

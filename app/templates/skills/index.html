@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Skills{% endblock %}
+
+{% block content %}
+<h4 class="mb-3">Skills</h4>
+
+<div class="row g-2 g-lg-3">
+  {% for item in skills_data %}
+  <div class="col-6 col-md-4 col-lg-3">
+    <form method="POST" action="{{ url_for('skills.toggle', skill_id=item.skill.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit"
+              class="btn w-100 py-3 {{ 'btn-success' if item.unlocked else 'btn-outline-secondary' }}">
+        {% if item.unlocked %}
+          <i class="bi bi-check-circle-fill"></i>
+        {% else %}
+          <i class="bi bi-circle"></i>
+        {% endif %}
+        <div class="mt-1 small fw-semibold">{{ item.skill.name }}</div>
+        {% if item.user_skill %}
+          <div class="mt-1" style="font-size: 0.7rem;">{{ item.user_skill.unlocked_date.strftime('%d/%m/%Y') }}</div>
+        {% endif %}
+      </button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

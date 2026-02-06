@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-12 col-sm-8 col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h4 class="card-title text-center mb-4">Crear Cuenta</h4>
+
+        <form method="POST">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            <label for="username" class="form-label">Usuario</label>
+            {{ form.username(class="form-control", placeholder="Elige un usuario", id="username") }}
+            {% for error in form.username.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            {{ form.email(class="form-control", placeholder="tu@email.com", id="email") }}
+            {% for error in form.email.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            {{ form.password(class="form-control", placeholder="Minimo 6 caracteres", id="password") }}
+            {% for error in form.password.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm" class="form-label">Confirmar Password</label>
+            {{ form.confirm(class="form-control", placeholder="Repite la password", id="confirm") }}
+            {% for error in form.confirm.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+        </form>
+
+        <p class="text-center mt-3 mb-0">
+          Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Iniciar sesion</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

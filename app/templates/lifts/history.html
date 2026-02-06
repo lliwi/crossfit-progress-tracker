@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Historico - {{ exercise.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">{{ exercise.name }}</h4>
+  <a href="{{ url_for('lifts.exercise_detail', exercise_id=exercise.id) }}" class="btn btn-outline-secondary btn-sm">
+    Volver
+  </a>
+</div>
+
+{% if lifts %}
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Peso</th>
+          <th>Tipo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lift in lifts %}
+        <tr>
+          <td>{{ lift.date.strftime('%d/%m/%Y') }}</td>
+          <td class="fw-bold">{{ lift.weight }} kg</td>
+          <td><span class="badge bg-{{ 'success' if lift.reps_type == 1 else 'info' }}">{{ lift.reps_type }}RM</span></td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('lifts.edit', lift_id=lift.id) }}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form method="POST" action="{{ url_for('lifts.delete', lift_id=lift.id) }}"
+                    onsubmit="return confirm('Borrar esta marca?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">No hay marcas registradas para este ejercicio.</div>
+{% endif %}
+
+<a href="{{ url_for('lifts.add') }}" class="btn btn-primary w-100 mt-3">+ Nueva Marca</a>
+{% endblock %}

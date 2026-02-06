@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<h4 class="mb-3">Mi Perfil</h4>
+
+<!-- Profile photo -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body text-center">
+    <div class="mb-3">
+      {% if current_user.profile_photo %}
+        <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.profile_photo) }}"
+             alt="Foto de perfil" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+      {% else %}
+        <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center"
+             style="width: 120px; height: 120px;">
+          <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
+        </div>
+      {% endif %}
+    </div>
+    <h5 class="mb-1">{{ current_user.username }}</h5>
+    <p class="text-muted small mb-3">{{ current_user.email }}</p>
+
+    <form method="POST" action="{{ url_for('profile.change_photo') }}" enctype="multipart/form-data">
+      {{ photo_form.hidden_tag() }}
+      <div class="d-flex justify-content-center gap-2 align-items-center">
+        {{ photo_form.photo(class="form-control form-control-sm", style="max-width: 250px;", accept="image/*") }}
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-upload"></i>
+        </button>
+      </div>
+      <small class="text-muted">Max 2MB (jpg, png, gif)</small>
+    </form>
+  </div>
+</div>
+
+<!-- Dark mode toggle -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('profile.toggle_theme') }}" class="d-flex justify-content-between align-items-center">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div>
+        <h6 class="mb-0"><i class="bi bi-moon-stars me-2"></i>Modo Oscuro</h6>
+      </div>
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" role="switch"
+               {{ 'checked' if current_user.dark_mode }} onchange="this.form.submit()">
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change email -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="card-title mb-3"><i class="bi bi-envelope me-2"></i>Cambiar Email</h6>
+    <form method="POST" action="{{ url_for('profile.change_email') }}">
+      {{ email_form.hidden_tag() }}
+      <div class="mb-3">
+        <label for="email" class="form-label">Nuevo email</label>
+        {{ email_form.email(class="form-control", id="email", placeholder=current_user.email) }}
+        {% for error in email_form.email.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Actualizar Email</button>
+    </form>
+  </div>
+</div>
+
+<!-- Change password -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="card-title mb-3"><i class="bi bi-lock me-2"></i>Cambiar Password</h6>
+    <form method="POST" action="{{ url_for('profile.change_password') }}">
+      {{ password_form.hidden_tag() }}
+      <div class="mb-3">
+        <label for="current_password" class="form-label">Password actual</label>
+        {{ password_form.current_password(class="form-control", id="current_password") }}
+      </div>
+      <div class="mb-3">
+        <label for="new_password" class="form-label">Nueva password</label>
+        {{ password_form.new_password(class="form-control", id="new_password") }}
+      </div>
+      <div class="mb-3">
+        <label for="confirm" class="form-label">Confirmar nueva password</label>
+        {{ password_form.confirm(class="form-control", id="confirm") }}
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Cambiar Password</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

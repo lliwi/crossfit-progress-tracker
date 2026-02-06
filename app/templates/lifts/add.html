@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Marca{% endblock %}
+
+{% block content %}
+<h4 class="mb-3">Nueva Marca</h4>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        <label for="exercise_id" class="form-label">Ejercicio</label>
+        {{ form.exercise_id(class="form-select", id="exercise_id") }}
+      </div>
+
+      <div class="mb-3">
+        <label for="new_exercise" class="form-label">O introduce uno nuevo</label>
+        {{ form.new_exercise(class="form-control", placeholder="Ej: Turkish Get-Up", id="new_exercise") }}
+      </div>
+
+      <div class="row">
+        <div class="col-6 mb-3">
+          <label for="weight" class="form-label">Peso (kg)</label>
+          {{ form.weight(class="form-control", placeholder="0.0", id="weight", step="0.5", inputmode="decimal") }}
+          {% for error in form.weight.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-6 mb-3">
+          <label for="reps_type" class="form-label">Tipo</label>
+          {{ form.reps_type(class="form-select", id="reps_type") }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="date" class="form-label">Fecha</label>
+        {{ form.date(class="form-control", id="date", type="date") }}
+        {% for error in form.date.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Guardar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
