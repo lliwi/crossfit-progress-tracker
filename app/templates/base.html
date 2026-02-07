@@ -37,7 +37,11 @@
         </a>
         <a href="{{ url_for('wods.index') }}"
            class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('wods') else 'btn-outline-light' }}">
-          <i class="bi bi-stopwatch me-1"></i>WODs
+          <i class="bi bi-calendar-week me-1"></i>WODs
+        </a>
+        <a href="{{ url_for('benchmarks.index') }}"
+           class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('benchmarks') else 'btn-outline-light' }}">
+          <i class="bi bi-trophy me-1"></i>Benchmarks
         </a>
         <a href="{{ url_for('skills.index') }}"
            class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('skills') else 'btn-outline-light' }}">
@@ -61,6 +65,9 @@
       <div class="d-lg-none d-flex gap-1">
         <a href="{{ url_for('lifts.add') }}" class="btn btn-primary btn-sm">
           <i class="bi bi-plus-lg"></i>
+        </a>
+        <a href="{{ url_for('timer.index') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-stopwatch-fill"></i>
         </a>
         <a href="{{ url_for('profile.index') }}" class="btn btn-outline-light btn-sm">
           <i class="bi bi-person-circle"></i>
@@ -106,14 +113,14 @@
         <i class="bi bi-bar-chart-fill d-block"></i>
         <small>Marcas</small>
       </a>
-      <a href="{{ url_for('timer.index') }}"
-         class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('timer') else 'text-secondary' }}">
-        <i class="bi bi-stopwatch-fill d-block"></i>
-        <small>Crono</small>
+      <a href="{{ url_for('benchmarks.index') }}"
+         class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('benchmarks') else 'text-secondary' }}">
+        <i class="bi bi-trophy d-block"></i>
+        <small>Bench</small>
       </a>
       <a href="{{ url_for('wods.index') }}"
          class="nav-link text-center {{ 'text-white' if request.endpoint and request.endpoint.startswith('wods') else 'text-secondary' }}">
-        <i class="bi bi-stopwatch d-block"></i>
+        <i class="bi bi-calendar-week d-block"></i>
         <small>WODs</small>
       </a>
       <a href="{{ url_for('skills.index') }}"

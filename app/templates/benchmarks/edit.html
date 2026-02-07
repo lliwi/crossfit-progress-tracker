@@ -3,14 +3,14 @@
 {% block title %}Editar Resultado{% endblock %}
 
 {% block content %}
-<h4 class="mb-3">Editar Resultado - {{ result.wod.name }}</h4>
+<h4 class="mb-3">Editar Resultado - {{ result.benchmark.name }}</h4>
 
 <div class="card shadow-sm">
   <div class="card-body">
     <form method="POST">
       {{ form.hidden_tag() }}
 
-      {% if result.wod.wod_type == 'for_time' %}
+      {% if result.benchmark.benchmark_type == 'for_time' %}
       <label class="form-label">Tiempo</label>
       <div class="row mb-3">
         <div class="col-6">
@@ -50,7 +50,7 @@
 
       <div class="d-flex gap-2">
         <button type="submit" class="btn btn-primary flex-fill">Guardar</button>
-        <a href="{{ url_for('wods.history', wod_id=result.wod_id) }}" class="btn btn-outline-secondary flex-fill">Cancelar</a>
+        <a href="{{ url_for('benchmarks.history', benchmark_id=result.benchmark_id) }}" class="btn btn-outline-secondary flex-fill">Cancelar</a>
       </div>
     </form>
   </div>

@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 
 from app.config import config
-from app.models import db, Exercise, Skill, Wod
+from app.models import db, Exercise, Skill, Benchmark
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -26,7 +26,7 @@ DEFAULT_SKILLS = [
     'Double Under', 'Toes-to-bar', 'Rope Climb', 'L-sit',
 ]
 
-DEFAULT_WODS = [
+DEFAULT_BENCHMARKS = [
     ('Fran', 'for_time',
      '21-15-9 reps:\n- Thrusters (43/30 kg)\n- Pull-ups'),
     ('Grace', 'for_time',
@@ -80,16 +80,18 @@ def create_app(config_name=None):
     from app.blueprints.lifts import lifts_bp
     from app.blueprints.skills import skills_bp
     from app.blueprints.profile import profile_bp
-    from app.blueprints.wods import wods_bp
+    from app.blueprints.benchmarks import benchmarks_bp
     from app.blueprints.timer import timer_bp
+    from app.blueprints.wods import wods_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/')
     app.register_blueprint(lifts_bp, url_prefix='/lifts')
     app.register_blueprint(skills_bp, url_prefix='/skills')
     app.register_blueprint(profile_bp, url_prefix='/profile')
-    app.register_blueprint(wods_bp, url_prefix='/wods')
+    app.register_blueprint(benchmarks_bp, url_prefix='/benchmarks')
     app.register_blueprint(timer_bp, url_prefix='/timer')
+    app.register_blueprint(wods_bp, url_prefix='/wods')
 
     with app.app_context():
         seed_defaults()
@@ -101,13 +103,13 @@ def seed_defaults():
     """Seed default exercises and skills if they don't exist."""
     from sqlalchemy import inspect, text
     inspector = inspect(db.engine)
-    if not inspector.has_table('exercises') or not inspector.has_table('wods'):
+    if not inspector.has_table('exercises') or not inspector.has_table('benchmarks'):
         return
 
     try:
         db.session.execute(text('LOCK TABLE exercises IN EXCLUSIVE MODE'))
         db.session.execute(text('LOCK TABLE skills IN EXCLUSIVE MODE'))
-        db.session.execute(text('LOCK TABLE wods IN EXCLUSIVE MODE'))
+        db.session.execute(text('LOCK TABLE benchmarks IN EXCLUSIVE MODE'))
 
         for name in DEFAULT_EXERCISES:
             if not Exercise.query.filter_by(name=name).first():
@@ -117,10 +119,10 @@ def seed_defaults():
             if not Skill.query.filter_by(name=name).first():
                 db.session.add(Skill(name=name, is_default=True))
 
-        for name, wod_type, description in DEFAULT_WODS:
-            if not Wod.query.filter_by(name=name).first():
-                db.session.add(Wod(
-                    name=name, wod_type=wod_type,
+        for name, benchmark_type, description in DEFAULT_BENCHMARKS:
+            if not Benchmark.query.filter_by(name=name).first():
+                db.session.add(Benchmark(
+                    name=name, benchmark_type=benchmark_type,
                     description=description, is_default=True,
                 ))
 

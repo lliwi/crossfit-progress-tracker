@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Nuevo Resultado WOD{% endblock %}
+{% block title %}Nuevo Resultado Benchmark{% endblock %}
 
 {% block content %}
-<h4 class="mb-3">Nuevo Resultado WOD</h4>
+<h4 class="mb-3">Nuevo Resultado Benchmark</h4>
 
 <div class="card shadow-sm">
   <div class="card-body">
@@ -11,8 +11,8 @@
       {{ form.hidden_tag() }}
 
       <div class="mb-3">
-        <label for="wod_id" class="form-label">WOD</label>
-        {{ form.wod_id(class="form-select", id="wod_id") }}
+        <label for="benchmark_id" class="form-label">Benchmark</label>
+        {{ form.benchmark_id(class="form-select", id="benchmark_id") }}
       </div>
 
       <!-- For Time fields -->
@@ -65,13 +65,13 @@
 
 {% block scripts %}
 <script>
-const wodTypes = {{ wod_types | tojson }};
-const wodSelect = document.getElementById('wod_id');
+const benchmarkTypes = {{ benchmark_types | tojson }};
+const bmSelect = document.getElementById('benchmark_id');
 const forTimeFields = document.getElementById('for-time-fields');
 const amrapFields = document.getElementById('amrap-fields');
 
 function toggleFields() {
-  const type = wodTypes[wodSelect.value];
+  const type = benchmarkTypes[bmSelect.value];
   if (type === 'amrap') {
     forTimeFields.style.display = 'none';
     amrapFields.style.display = 'block';
@@ -81,7 +81,7 @@ function toggleFields() {
   }
 }
 
-wodSelect.addEventListener('change', toggleFields);
+bmSelect.addEventListener('change', toggleFields);
 toggleFields();
 </script>
 {% endblock %}

@@ -1,51 +1,67 @@
 {% extends "base.html" %}
 
-{% block title %}WODs{% endblock %}
+{% block title %}WODs de la Semana{% endblock %}
 
 {% block content %}
+{% if week %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0">WODs Benchmark</h4>
-  <a href="{{ url_for('wods.add') }}" class="btn btn-primary btn-sm">+ Nuevo Resultado</a>
+  <h4 class="mb-0">WODs de la Semana</h4>
+  <span class="badge bg-secondary">{{ week.metadata.trainingDate }}</span>
 </div>
 
-{% if wod_data %}
-<div class="row">
-  {% for item in wod_data %}
-  <div class="col-12 col-md-6 col-lg-4 mb-3">
-    <a href="{{ url_for('wods.detail', wod_id=item.wod.id) }}" class="text-decoration-none">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h6 class="card-title mb-1">{{ item.wod.name }}</h6>
-              <span class="badge bg-{{ 'warning text-dark' if item.wod.wod_type == 'for_time' else 'info' }}">
-                {{ 'For Time' if item.wod.wod_type == 'for_time' else 'AMRAP' }}
+<div class="accordion" id="weekAccordion">
+  {% for day in week.data.entrenamientos %}
+  {% set is_today = day.dia_numero == today_weekday %}
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button {{ '' if is_today else 'collapsed' }}" type="button"
+              data-bs-toggle="collapse" data-bs-target="#day{{ day.dia_numero }}">
+        <span class="fw-bold">{{ day.dia_nombre }}</span>
+        {% if is_today %}
+        <span class="badge bg-primary ms-2">Hoy</span>
+        {% endif %}
+        <!-- Section summary pills -->
+        <span class="ms-auto me-3 d-flex gap-1 flex-wrap">
+          {% for sec in day.secciones %}
+          <span class="badge bg-{{ 'danger' if sec.titulo in ['WOD', 'METCON', 'Workout'] else 'warning text-dark' if sec.titulo in ['OLY', 'FUERZA'] else 'info' if sec.titulo == 'SKILL' else 'success' if sec.titulo == 'ENDURANCE' else 'secondary' }} badge-sm">
+            {{ sec.titulo }}
+          </span>
+          {% endfor %}
+        </span>
+      </button>
+    </h2>
+    <div id="day{{ day.dia_numero }}" class="accordion-collapse collapse {{ 'show' if is_today else '' }}"
+         data-bs-parent="#weekAccordion">
+      <div class="accordion-body p-2">
+        {% for sec in day.secciones %}
+        <div class="card mb-2 shadow-sm">
+          <div class="card-body py-2 px-3">
+            <h6 class="card-title mb-1">
+              <span class="badge bg-{{ 'danger' if sec.titulo in ['WOD', 'METCON', 'Workout'] else 'warning text-dark' if sec.titulo in ['OLY', 'FUERZA'] else 'info' if sec.titulo == 'SKILL' else 'success' if sec.titulo == 'ENDURANCE' else 'secondary' }} me-1">
+                {{ sec.titulo }}
               </span>
-            </div>
-            {% if item.best %}
-            <div class="text-end">
-              {% if item.wod.wod_type == 'for_time' %}
-                <span class="fw-bold fs-5">{{ format_time(item.best.time_seconds) }}</span>
-              {% else %}
-                <span class="fw-bold fs-5">{{ item.best.rounds }}{% if item.best.reps %}+{{ item.best.reps }}{% endif %}</span>
-              {% endif %}
-              <br>
-              <span class="badge bg-{{ 'success' if item.best.rx else 'secondary' }} small">
-                {{ 'RX' if item.best.rx else 'Scaled' }}
-              </span>
-            </div>
+            </h6>
+            {% if sec.contenido is string %}
+              <p class="mb-0 small">{{ sec.contenido }}</p>
             {% else %}
-            <span class="text-muted small">Sin resultado</span>
+              <ul class="mb-0 small ps-3">
+                {% for line in sec.contenido %}
+                <li>{{ line }}</li>
+                {% endfor %}
+              </ul>
             {% endif %}
           </div>
-          <p class="card-text text-muted small mt-2 mb-0" style="white-space: pre-line;">{{ item.wod.description }}</p>
         </div>
+        {% endfor %}
       </div>
-    </a>
+    </div>
   </div>
   {% endfor %}
 </div>
+
 {% else %}
-<div class="alert alert-info">No hay WODs disponibles.</div>
+<h4 class="mb-3">WODs de la Semana</h4>
+<div class="alert alert-info">No hay entrenamientos cargados para esta semana.</div>
 {% endif %}
 {% endblock %}

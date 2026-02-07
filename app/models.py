@@ -20,7 +20,7 @@ class User(UserMixin, db.Model):
 
     lifts = db.relationship('Lift', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     user_skills = db.relationship('UserSkill', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    wod_results = db.relationship('WodResult', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    benchmark_results = db.relationship('BenchmarkResult', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = bcrypt.hashpw(
@@ -79,24 +79,24 @@ class UserSkill(db.Model):
     )
 
 
-class Wod(db.Model):
-    __tablename__ = 'wods'
+class Benchmark(db.Model):
+    __tablename__ = 'benchmarks'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=True)
-    wod_type = db.Column(db.String(20), nullable=False)  # 'for_time' or 'amrap'
+    benchmark_type = db.Column(db.String(20), nullable=False)  # 'for_time' or 'amrap'
     is_default = db.Column(db.Boolean, default=False)
 
-    results = db.relationship('WodResult', backref='wod', lazy='dynamic')
+    results = db.relationship('BenchmarkResult', backref='benchmark', lazy='dynamic')
 
 
-class WodResult(db.Model):
-    __tablename__ = 'wod_results'
+class BenchmarkResult(db.Model):
+    __tablename__ = 'benchmark_results'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    wod_id = db.Column(db.Integer, db.ForeignKey('wods.id'), nullable=False)
+    benchmark_id = db.Column(db.Integer, db.ForeignKey('benchmarks.id'), nullable=False)
     time_seconds = db.Column(db.Integer, nullable=True)
     rounds = db.Column(db.Integer, nullable=True)
     reps = db.Column(db.Integer, nullable=True)

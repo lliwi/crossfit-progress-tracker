@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}{{ wod.name }}{% endblock %}
+{% block title %}{{ benchmark.name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0">{{ wod.name }}</h4>
+  <h4 class="mb-0">{{ benchmark.name }}</h4>
   <div class="d-flex gap-2">
-    <a href="{{ url_for('wods.history', wod_id=wod.id) }}" class="btn btn-outline-secondary btn-sm">Historico</a>
-    <a href="{{ url_for('wods.add') }}" class="btn btn-primary btn-sm">+ Nuevo</a>
+    <a href="{{ url_for('benchmarks.history', benchmark_id=benchmark.id) }}" class="btn btn-outline-secondary btn-sm">Historico</a>
+    <a href="{{ url_for('benchmarks.add') }}" class="btn btn-primary btn-sm">+ Nuevo</a>
   </div>
 </div>
 
-<!-- WOD description -->
+<!-- Benchmark description -->
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <span class="badge bg-{{ 'warning text-dark' if wod.wod_type == 'for_time' else 'info' }}">
-        {{ 'For Time' if wod.wod_type == 'for_time' else 'AMRAP' }}
+      <span class="badge bg-{{ 'warning text-dark' if benchmark.benchmark_type == 'for_time' else 'info' }}">
+        {{ 'For Time' if benchmark.benchmark_type == 'for_time' else 'AMRAP' }}
       </span>
       {% if best %}
       <div>
         <span class="fw-bold">PR:
-          {% if wod.wod_type == 'for_time' %}
+          {% if benchmark.benchmark_type == 'for_time' %}
             {{ format_time(best.time_seconds) }}
           {% else %}
             {{ best.rounds }}{% if best.reps %}+{{ best.reps }}{% endif %} rondas
@@ -33,7 +33,7 @@
       </div>
       {% endif %}
     </div>
-    <p class="mb-0" style="white-space: pre-line;">{{ wod.description }}</p>
+    <p class="mb-0" style="white-space: pre-line;">{{ benchmark.description }}</p>
   </div>
 </div>
 
@@ -42,7 +42,7 @@
 <div class="card shadow-sm mb-3">
   <div class="card-header fw-semibold">Evolucion</div>
   <div class="card-body d-flex align-items-center">
-    <canvas id="wodChart" class="w-100"></canvas>
+    <canvas id="bmChart" class="w-100"></canvas>
   </div>
 </div>
 {% else %}
@@ -56,17 +56,17 @@
 {% if chart_data %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
-const ctx = document.getElementById('wodChart').getContext('2d');
+const ctx = document.getElementById('bmChart').getContext('2d');
 
 new Chart(ctx, {
   type: 'line',
   data: {
     labels: {{ chart_data.labels | tojson }},
     datasets: [{
-      label: '{{ "Tiempo (seg)" if wod.wod_type == "for_time" else "Rondas" }}',
+      label: '{{ "Tiempo (seg)" if benchmark.benchmark_type == "for_time" else "Rondas" }}',
       data: {{ chart_data.data | tojson }},
-      borderColor: '{{ "#ffc107" if wod.wod_type == "for_time" else "#0dcaf0" }}',
-      backgroundColor: '{{ "rgba(255, 193, 7, 0.1)" if wod.wod_type == "for_time" else "rgba(13, 202, 240, 0.1)" }}',
+      borderColor: '{{ "#ffc107" if benchmark.benchmark_type == "for_time" else "#0dcaf0" }}',
+      backgroundColor: '{{ "rgba(255, 193, 7, 0.1)" if benchmark.benchmark_type == "for_time" else "rgba(13, 202, 240, 0.1)" }}',
       tension: 0.3,
       fill: true,
     }]
@@ -78,7 +78,7 @@ new Chart(ctx, {
       legend: { position: 'top' },
       tooltip: {
         callbacks: {
-          {% if wod.wod_type == 'for_time' %}
+          {% if benchmark.benchmark_type == 'for_time' %}
           label: function(context) {
             const total = context.parsed.y;
             const m = Math.floor(total / 60);
@@ -92,7 +92,7 @@ new Chart(ctx, {
     scales: {
       y: {
         beginAtZero: false,
-        {% if wod.wod_type == 'for_time' %}
+        {% if benchmark.benchmark_type == 'for_time' %}
         reverse: true,
         title: { display: true, text: 'Tiempo (seg) - menor es mejor' },
         {% else %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Benchmarks{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Benchmarks</h4>
+  <a href="{{ url_for('benchmarks.add') }}" class="btn btn-primary btn-sm">+ Nuevo Resultado</a>
+</div>
+
+{% if benchmark_data %}
+<div class="row">
+  {% for item in benchmark_data %}
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <a href="{{ url_for('benchmarks.detail', benchmark_id=item.benchmark.id) }}" class="text-decoration-none">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="card-title mb-1">{{ item.benchmark.name }}</h6>
+              <span class="badge bg-{{ 'warning text-dark' if item.benchmark.benchmark_type == 'for_time' else 'info' }}">
+                {{ 'For Time' if item.benchmark.benchmark_type == 'for_time' else 'AMRAP' }}
+              </span>
+            </div>
+            {% if item.best %}
+            <div class="text-end">
+              {% if item.benchmark.benchmark_type == 'for_time' %}
+                <span class="fw-bold fs-5">{{ format_time(item.best.time_seconds) }}</span>
+              {% else %}
+                <span class="fw-bold fs-5">{{ item.best.rounds }}{% if item.best.reps %}+{{ item.best.reps }}{% endif %}</span>
+              {% endif %}
+              <br>
+              <span class="badge bg-{{ 'success' if item.best.rx else 'secondary' }} small">
+                {{ 'RX' if item.best.rx else 'Scaled' }}
+              </span>
+            </div>
+            {% else %}
+            <span class="text-muted small">Sin resultado</span>
+            {% endif %}
+          </div>
+          <p class="card-text text-muted small mt-2 mb-0" style="white-space: pre-line;">{{ item.benchmark.description }}</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No hay benchmarks disponibles.</div>
+{% endif %}
+{% endblock %}
