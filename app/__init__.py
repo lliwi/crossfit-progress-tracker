@@ -102,7 +102,13 @@ def create_app(config_name=None):
 def seed_defaults():
     """Seed default exercises and skills if they don't exist."""
     from sqlalchemy import inspect, text
-    inspector = inspect(db.engine)
+    from sqlalchemy.exc import OperationalError
+
+    try:
+        inspector = inspect(db.engine)
+    except OperationalError:
+        return
+
     if not inspector.has_table('exercises') or not inspector.has_table('benchmarks'):
         return
 
