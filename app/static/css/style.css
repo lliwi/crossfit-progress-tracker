@@ -39,6 +39,13 @@ body {
   background-color: #212529;
 }
 
+/* Login logo: show correct version per theme */
+.login-logo-light { display: inline; }
+.login-logo-dark { display: none; }
+
+[data-bs-theme="dark"] .login-logo-light { display: none; }
+[data-bs-theme="dark"] .login-logo-dark { display: inline; }
+
 /* Weight stepper */
 .weight-stepper .weight-btn {
   min-width: 44px;
