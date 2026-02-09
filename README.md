@@ -75,6 +75,23 @@ El script `stats.sh` consulta la base de datos y muestra estadisticas. Se ejecut
 ./stats.sh --detail
 ```
 
+## Backup y restauracion
+
+El script `backup.sh` permite exportar e importar la base de datos. Se ejecuta desde fuera del contenedor:
+
+```bash
+# Exportar (crea backups/backup_crossfit_tracker_YYYYMMDD_HHMMSS.sql.gz)
+./backup.sh export
+
+# Listar backups disponibles
+./backup.sh list
+
+# Importar un backup (pide confirmacion antes de sobreescribir)
+./backup.sh import backup_crossfit_tracker_20260209_120000.sql.gz
+```
+
+Los backups se guardan en la carpeta `backups/` comprimidos con gzip.
+
 ## Seguridad
 
 - Passwords hasheados con **bcrypt** (salt automatico)
@@ -114,6 +131,8 @@ El script `stats.sh` consulta la base de datos y muestra estadisticas. Se ejecut
 ├── entrypoint.sh            # Migraciones + gunicorn
 ├── start.sh                 # Script de arranque
 ├── stats.sh                 # Estadisticas del sistema
+├── backup.sh                # Backup y restauracion de BD
+├── backups/                 # Backups generados
 ├── requirements.txt
 └── wsgi.py
 ```
