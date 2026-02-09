@@ -29,6 +29,10 @@ class ProductionConfig(Config):
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 
+    def __init__(self):
+        if not os.environ.get('SECRET_KEY'):
+            raise RuntimeError('SECRET_KEY must be set in production')
+
 
 config = {
     'development': DevelopmentConfig,

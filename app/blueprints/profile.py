@@ -1,6 +1,7 @@
 import os
 
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app, make_response
+from flask import (Blueprint, render_template, redirect, url_for, flash,
+                    current_app, make_response)
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
@@ -98,7 +99,8 @@ def toggle_theme():
     flash(f'Modo {mode} activado.', 'success')
     resp = make_response(redirect(url_for('profile.index')))
     resp.set_cookie('theme', 'dark' if current_user.dark_mode else 'light',
-                     max_age=60 * 60 * 24 * 365, samesite='Lax')
+                     max_age=60 * 60 * 24 * 365, samesite='Lax',
+                     httponly=True, secure=not current_app.debug)
     return resp
 
 
@@ -123,8 +125,11 @@ def change_photo():
 
         # Delete old photo if exists
         if current_user.profile_photo:
-            old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], current_user.profile_photo)
-            if os.path.exists(old_path):
+            old_path = os.path.realpath(
+                os.path.join(current_app.config['UPLOAD_FOLDER'], current_user.profile_photo)
+            )
+            upload_real = os.path.realpath(current_app.config['UPLOAD_FOLDER'])
+            if old_path.startswith(upload_real + os.sep) and os.path.exists(old_path):
                 os.remove(old_path)
 
         # Save new photo
