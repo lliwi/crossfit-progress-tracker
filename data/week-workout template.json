@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "parsedAt": "ISO_8601_TIMESTAMP",
+    "trainingDate": "YYYY-MM-DD",
+    "source": "string",
+    "parsedBy": "string",
+    "totalDays": "integer"
+  },
+  "data": {
+    "entrenamientos": [
+      {
+        "dia_numero": "integer",
+        "dia_nombre": "string",
+        "secciones": [
+          {
+            "titulo": "string",
+            "contenido": "string_or_array_of_strings"
+          }
+        ]
+      }
+    ]
+  }
+}
