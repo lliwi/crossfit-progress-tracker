@@ -72,20 +72,34 @@ El registro es cerrado: solo se puede crear una cuenta con un codigo de invitaci
 
 La variable `BASE_URL` en `.env` define la URL base para los links de invitacion (ej: `https://tudominio.com`).
 
+### Primera invitacion (bootstrap)
+
+Para crear la primera invitacion sin tener aun un usuario registrado, usa el script `invite.sh`:
+
+```bash
+./invite.sh
+```
+
+Esto genera un token de invitacion directamente en la base de datos y muestra la URL de registro. Abre esa URL en el navegador para crear el primer usuario.
+
 ## Panel de administracion
 
 Accesible en `/admin` solo para usuarios con rol admin. Incluye:
 
 - **Dashboard** — Estadisticas del sistema (usuarios, marcas, skills, benchmarks)
-- **Usuarios** — Listar, toggle admin, reiniciar password, eliminar
+- **Usuarios** — Listar, toggle admin, activar/desactivar, reiniciar password, eliminar
 - **Invitaciones** — Ver todas, generar invitaciones de sistema, revocar pendientes
 
-Para promover un usuario a admin:
+### Promover el primer admin
+
+Tras registrar el primer usuario, promocionalo a admin desde la terminal:
 
 ```bash
 docker compose exec db psql -U crossfit -d crossfit_tracker \
   -c "UPDATE users SET is_admin = true WHERE username = 'tu_usuario';"
 ```
+
+Una vez tengas un admin, puedes gestionar roles desde el panel web en `/admin/users`.
 
 ## WODs semanales
 
