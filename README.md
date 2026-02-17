@@ -27,6 +27,7 @@ DATABASE_URL=postgresql://crossfit:crossfit@db:5432/crossfit_tracker
 POSTGRES_USER=crossfit
 POSTGRES_PASSWORD=crossfit
 POSTGRES_DB=crossfit_tracker
+BASE_URL=http://localhost:5000
 ```
 
 ### 2. Arrancar con Docker
@@ -57,7 +58,34 @@ docker compose up -d
 | **Benchmarks** | `/benchmarks` | Girls y hero WODs con historial de resultados |
 | **Skills** | `/skills` | Seguimiento de skills desbloqueados |
 | **Crono** | `/timer` | Cronometro para WODs |
-| **Perfil** | `/profile` | Foto, email, password y modo oscuro/claro |
+| **Perfil** | `/profile` | Foto, email, password, modo oscuro y invitaciones |
+| **Admin** | `/admin` | Panel de administracion (solo admins) |
+
+## Registro por invitacion
+
+El registro es cerrado: solo se puede crear una cuenta con un codigo de invitacion valido. Cada invitacion es de un solo uso.
+
+1. Un usuario registrado va a **Perfil** y pulsa **Generar** invitacion
+2. Copia el link generado y lo comparte con quien quiera invitar
+3. El invitado abre el link, que le lleva al formulario de registro con el codigo pre-rellenado
+4. Tras registrarse, la invitacion queda marcada como usada y no se puede reutilizar
+
+La variable `BASE_URL` en `.env` define la URL base para los links de invitacion (ej: `https://tudominio.com`).
+
+## Panel de administracion
+
+Accesible en `/admin` solo para usuarios con rol admin. Incluye:
+
+- **Dashboard** — Estadisticas del sistema (usuarios, marcas, skills, benchmarks)
+- **Usuarios** — Listar, toggle admin, reiniciar password, eliminar
+- **Invitaciones** — Ver todas, generar invitaciones de sistema, revocar pendientes
+
+Para promover un usuario a admin:
+
+```bash
+docker compose exec db psql -U crossfit -d crossfit_tracker \
+  -c "UPDATE users SET is_admin = true WHERE username = 'tu_usuario';"
+```
 
 ## WODs semanales
 
@@ -102,6 +130,8 @@ Los backups se guardan en la carpeta `backups/` comprimidos con gzip.
 - Proteccion contra **path traversal** en subida de fotos
 - Cookies de sesion con `Secure`, `HttpOnly` y `SameSite=Lax` en produccion
 - `SECRET_KEY` obligatoria en produccion (falla si no esta definida)
+- **Registro por invitacion** (tokens unicos de un solo uso)
+- **Panel admin** protegido por decorador `admin_required` (403 si no es admin)
 - Consultas via **SQLAlchemy ORM** (sin SQL crudo, prevencion de SQL injection)
 
 ## Estructura del proyecto
@@ -120,7 +150,8 @@ Los backups se guardan en la carpeta `backups/` comprimidos con gzip.
 │   │   ├── benchmarks.py    # Benchmarks y resultados
 │   │   ├── skills.py        # Skills desbloqueados
 │   │   ├── timer.py         # Cronometro
-│   │   └── profile.py       # Perfil de usuario
+│   │   ├── profile.py       # Perfil de usuario
+│   │   └── admin.py         # Panel de administracion
 │   ├── templates/           # Templates Jinja2
 │   └── static/              # CSS, JS, imagenes
 ├── data/

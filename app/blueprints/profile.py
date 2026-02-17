@@ -1,4 +1,5 @@
 import os
+import secrets
 
 from flask import (Blueprint, render_template, redirect, url_for, flash,
                     current_app, make_response)
@@ -9,7 +10,7 @@ from PIL import Image
 from wtforms import PasswordField, StringField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 
-from app.models import db, User
+from app.models import db, User, Invitation
 
 profile_bp = Blueprint('profile', __name__, template_folder='../templates')
 
@@ -40,18 +41,46 @@ class ProfilePhotoForm(FlaskForm):
     ])
 
 
+class InviteForm(FlaskForm):
+    pass
+
+
 @profile_bp.route('/')
 @login_required
 def index():
     password_form = ChangePasswordForm()
     email_form = ChangeEmailForm()
     photo_form = ProfilePhotoForm()
+    invite_form = InviteForm()
+    invitations = (Invitation.query
+                   .filter_by(created_by=current_user.id)
+                   .order_by(Invitation.created_at.desc())
+                   .all())
+    base_url = current_app.config['BASE_URL'].rstrip('/')
     return render_template(
         'profile/index.html',
         password_form=password_form,
         email_form=email_form,
         photo_form=photo_form,
+        invite_form=invite_form,
+        invitations=invitations,
+        base_url=base_url,
     )
+
+
+@profile_bp.route('/invite', methods=['POST'])
+@login_required
+def generate_invite():
+    form = InviteForm()
+    if form.validate_on_submit():
+        invitation = Invitation(
+            token=secrets.token_urlsafe(32),
+            created_by=current_user.id,
+        )
+        db.session.add(invitation)
+        db.session.commit()
+        flash('Invitacion generada.', 'success')
+    return redirect(url_for('profile.index'))
 
 
 @profile_bp.route('/password', methods=['POST'])

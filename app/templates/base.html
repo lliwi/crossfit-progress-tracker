@@ -52,6 +52,12 @@
           <i class="bi bi-stopwatch-fill me-1"></i>Crono
         </a>
         <span class="text-secondary mx-2">|</span>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin.index') }}"
+           class="btn btn-sm {{ 'btn-warning' if request.endpoint and request.endpoint.startswith('admin') else 'btn-outline-warning' }}">
+          <i class="bi bi-shield-fill me-1"></i>Admin
+        </a>
+        {% endif %}
         <a href="{{ url_for('profile.index') }}"
            class="btn btn-sm {{ 'btn-light' if request.endpoint and request.endpoint.startswith('profile') else 'btn-outline-light' }}">
           <i class="bi bi-person-circle me-1"></i>Perfil
@@ -75,6 +81,11 @@
         <a href="{{ url_for('profile.index') }}" class="btn btn-outline-light btn-sm">
           <i class="bi bi-person-circle"></i>
         </a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-warning btn-sm">
+          <i class="bi bi-shield-fill"></i>
+        </a>
+        {% endif %}
         <form method="POST" action="{{ url_for('auth.logout') }}" class="d-inline">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn btn-outline-light btn-sm">

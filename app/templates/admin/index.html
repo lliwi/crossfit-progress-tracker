@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-shield-fill me-2"></i>Panel de Administracion</h4>
+  <div class="d-flex gap-1">
+    <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-people me-1"></i>Usuarios
+    </a>
+    <a href="{{ url_for('admin.invitations') }}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-envelope-plus me-1"></i>Invitaciones
+    </a>
+  </div>
+</div>
+
+<!-- Stats summary -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="mb-3"><i class="bi bi-bar-chart me-2"></i>Resumen del sistema</h6>
+    <div class="row text-center">
+      <div class="col-4 col-md mb-2">
+        <div class="fs-3 fw-bold">{{ stats.users }}</div>
+        <small class="text-muted">Usuarios</small>
+      </div>
+      <div class="col-4 col-md mb-2">
+        <div class="fs-3 fw-bold">{{ stats.lifts }}</div>
+        <small class="text-muted">Marcas</small>
+      </div>
+      <div class="col-4 col-md mb-2">
+        <div class="fs-3 fw-bold">{{ stats.skills }}</div>
+        <small class="text-muted">Skills</small>
+      </div>
+      <div class="col-6 col-md mb-2">
+        <div class="fs-3 fw-bold">{{ stats.benchmarks }}</div>
+        <small class="text-muted">Benchmarks</small>
+      </div>
+      <div class="col-6 col-md mb-2">
+        <div class="fs-3 fw-bold">{{ stats.results }}</div>
+        <small class="text-muted">Resultados</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lifts by exercise -->
+{% if lifts_by_exercise %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Marcas por ejercicio</h6>
+    <div class="table-responsive">
+      <table class="table table-sm small mb-0">
+        <thead>
+          <tr><th>Ejercicio</th><th class="text-end">Registros</th></tr>
+        </thead>
+        <tbody>
+          {% for name, count in lifts_by_exercise %}
+          <tr>
+            <td>{{ name }}</td>
+            <td class="text-end">{{ count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Top benchmarks -->
+{% if top_benchmarks %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="mb-3"><i class="bi bi-trophy me-2"></i>Top Benchmarks</h6>
+    <div class="table-responsive">
+      <table class="table table-sm small mb-0">
+        <thead>
+          <tr><th>Benchmark</th><th class="text-end">Resultados</th></tr>
+        </thead>
+        <tbody>
+          {% for name, count in top_benchmarks %}
+          <tr>
+            <td>{{ name }}</td>
+            <td class="text-end">{{ count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Last lift -->
+{% if last_lift %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="mb-3"><i class="bi bi-clock-history me-2"></i>Ultimo registro</h6>
+    <div class="small">
+      <div><strong>{{ last_lift.user.username }}</strong> - {{ last_lift.exercise.name }}</div>
+      <div>{{ last_lift.weight }}kg ({{ last_lift.reps_type }}RM) - {{ last_lift.date.strftime('%d/%m/%Y') }}</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

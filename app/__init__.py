@@ -87,6 +87,7 @@ def create_app(config_name=None):
     from app.blueprints.benchmarks import benchmarks_bp
     from app.blueprints.timer import timer_bp
     from app.blueprints.wods import wods_bp
+    from app.blueprints.admin import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/')
@@ -96,11 +97,28 @@ def create_app(config_name=None):
     app.register_blueprint(benchmarks_bp, url_prefix='/benchmarks')
     app.register_blueprint(timer_bp, url_prefix='/timer')
     app.register_blueprint(wods_bp, url_prefix='/wods')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
 
     with app.app_context():
         seed_defaults()
+        _log_pending_invitations(app)
 
     return app
+
+
+def _log_pending_invitations(app):
+    """Log pending invitation URLs on startup."""
+    from app.models import Invitation
+    try:
+        pending = Invitation.query.filter_by(used_by=None).all()
+    except Exception:
+        return
+    if not pending:
+        return
+    base_url = app.config.get('BASE_URL', 'http://localhost:5000').rstrip('/')
+    app.logger.info('=== Invitaciones pendientes ===')
+    for inv in pending:
+        app.logger.info('  %s/auth/register?token=%s', base_url, inv.token)
 
 
 def seed_defaults():

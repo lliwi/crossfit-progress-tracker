@@ -17,6 +17,7 @@ class Config:
     WTF_CSRF_ENABLED = True
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # 2MB
     UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads', 'avatars')
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
 
 
 class DevelopmentConfig(Config):

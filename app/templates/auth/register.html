@@ -13,6 +13,14 @@
           {{ form.hidden_tag() }}
 
           <div class="mb-3">
+            <label for="invite_code" class="form-label">Codigo de invitacion</label>
+            {{ form.invite_code(class="form-control", placeholder="Introduce tu codigo", id="invite_code", readonly=form.invite_code.data) }}
+            {% for error in form.invite_code.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
             <label for="username" class="form-label">Usuario</label>
             {{ form.username(class="form-control", placeholder="Elige un usuario", id="username") }}
             {% for error in form.username.errors %}

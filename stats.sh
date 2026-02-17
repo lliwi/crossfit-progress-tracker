@@ -104,8 +104,7 @@ show_detail() {
 
     header "Detalle por usuario"
 
-    run_sql "SELECT id, username, email, created_at FROM users ORDER BY id" |
-    while IFS='|' read -r uid uname email created; do
+    while IFS='|' read -r uid uname email created <&3; do
         echo ""
         echo -e "  ${BOLD}${GREEN}$uname${RESET} ${DIM}($email - desde $created)${RESET}"
 
@@ -175,7 +174,7 @@ show_detail() {
                 echo -e "      ${DIM}... y $((bench_count - 10)) mas${RESET}"
             fi
         fi
-    done
+    done 3< <(run_sql "SELECT id, username, email, created_at FROM users ORDER BY id")
 }
 
 # ─── Main ─────────────────────────────────────────────────────────────

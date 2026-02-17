@@ -16,11 +16,17 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     profile_photo = db.Column(db.String(200), nullable=True)
     dark_mode = db.Column(db.Boolean, default=True, nullable=False, server_default='true')
+    is_admin = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
+    is_active = db.Column(db.Boolean, default=True, nullable=False, server_default='true')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     lifts = db.relationship('Lift', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     user_skills = db.relationship('UserSkill', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     benchmark_results = db.relationship('BenchmarkResult', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    invitations_created = db.relationship(
+        'Invitation', foreign_keys='Invitation.created_by',
+        backref='creator', lazy='dynamic',
+    )
 
     def set_password(self, password):
         self.password_hash = bcrypt.hashpw(
@@ -104,3 +110,20 @@ class BenchmarkResult(db.Model):
     date = db.Column(db.Date, nullable=False, default=date.today)
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Invitation(db.Model):
+    __tablename__ = 'invitations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(64), unique=True, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    used_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    used_at = db.Column(db.DateTime, nullable=True)
+
+    registered_user = db.relationship('User', foreign_keys=[used_by])
+
+    @property
+    def is_valid(self):
+        return self.used_by is None
